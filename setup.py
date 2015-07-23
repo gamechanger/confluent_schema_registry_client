@@ -10,8 +10,7 @@ setuptools.setup(
     license="MIT",
     keywords="confluent schema registry client avro http rest",
     url="http://github.com/gamechanger/confluent_schema_registry_client",
-    packages=[""],
-    long_description="",
-    install_requires=[],
-    tests_require=['nose']
+    packages=["confluent_schema_registry_client"],
+    install_requires=['requests>=2.7.0'],
+    tests_require=['nose', 'requests_mock']
     )
