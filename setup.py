@@ -1,6 +1,5 @@
 import setuptools
 
-
 setuptools.setup(
     name="confluent_schema_registry_client",
     version="1.0.0",
