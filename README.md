@@ -1,6 +1,8 @@
 # confluent_schema_registry_client
 A simple Python client for Confluent's Schema Registry
 
+![](https://travis-ci.org/gamechanger/confluent_schema_registry_client.svg?branch=master)
+
 
 ## Example
 ```python
