@@ -8,14 +8,23 @@ class SchemaRegistryException(Exception):
     """
     Base exception class for all SchemaRegistryClient-raised exceptions.
     """
-    def __init__(self, code, message):
+    def __init__(self, code=None, message=None):
         self.code = code
         self.message = message
 
+    def __str__(self):
+        return "{}({})".format(self.__class__.__name__, self.__dict__)
+
 def raise_if_failed(res):
     if res.status_code >= 400:
-        data = res.json()
-        raise SchemaRegistryException(data['error_code'], data['message'])
+        try:
+            data = res.json()
+            e = SchemaRegistryException(
+                data.get('error_code'), data.get('message'))
+        except:
+            e = SchemaRegistryException()
+        raise e
+
 
 
 class SchemaRegistryClient(object):
@@ -53,6 +62,7 @@ class SchemaRegistryClient(object):
         return self.get_subject_version(subject, 'latest')
 
     def register_subject_version(self, subject, schema):
-        data = json.dumps({'schema': schema})
+        data = json.dumps({'schema': json.dumps(schema)})
         res = requests.post(self._url('/subjects/{}/versions', subject), data=data, headers=HEADERS)
         raise_if_failed(res)
+        return res.json()

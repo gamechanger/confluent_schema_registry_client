@@ -6,7 +6,7 @@ from confluent_schema_registry_client import SchemaRegistryClient, SchemaRegistr
 TEST_DOMAIN = 'test_domain.gc.com'
 TEST_PORT = 8081
 SCHEMA = {"type": "string"}
-ENCODED_SCHEMA = "{\"type\": \"string\"}"
+STRING_SCHEMA = "{\"type\": \"string\"}"
 
 
 def url(path):
@@ -23,7 +23,7 @@ class TestSchemaRegistryClient(TestCase):
     def test_get_schema(self):
         with Mocker() as m:
             m.get(url('/schemas/ids/abc123'), json={
-                'schema': ENCODED_SCHEMA
+                'schema': STRING_SCHEMA
             })
 
             schema = self.client.get_schema('abc123')
@@ -41,7 +41,6 @@ class TestSchemaRegistryClient(TestCase):
                     status_code=404)
 
                 self.client.get_schema('abc123')
-
             self.assertEquals(cm.exception.code, 40403)
             self.assertEquals(cm.exception.message, 'Schema not found')
 
@@ -94,7 +93,7 @@ class TestSchemaRegistryClient(TestCase):
                 json={
                     'name': 'test',
                     'version': 34,
-                    'schema': ENCODED_SCHEMA
+                    'schema': STRING_SCHEMA
                 })
             self.assertEquals(
                 SCHEMA,
@@ -111,3 +110,22 @@ class TestSchemaRegistryClient(TestCase):
                     },
                     status_code=422)
                 self.client.get_subject_version('test', 34)
+
+    def test_register_subject_version(self):
+        with Mocker() as m:
+            m.post(
+                url('/subjects/test/versions'),
+                json=34)
+            self.assertEquals(
+                34,
+                self.client.register_subject_version('test', SCHEMA))
+            self.assertEquals(
+                {'schema': STRING_SCHEMA},
+                m.last_request.json())
+
+    def test_register_subject_version_incompatible(self):
+        with Mocker() as m:
+            with self.assertRaises(SchemaRegistryException):
+                m.post(
+                    url('/subjects/test/versions'), status_code=409)
+                self.client.register_subject_version('test', SCHEMA)
