@@ -1,6 +1,7 @@
 from unittest import TestCase
 from requests_mock import Mocker
-from confluent_schema_registry_client import SchemaRegistryClient, SchemaRegistryException
+from confluent_schema_registry_client import (
+    SchemaRegistryClient, SchemaRegistryException, CompatibilityLevel)
 
 
 TEST_DOMAIN = 'test_domain.gc.com'
@@ -219,3 +220,9 @@ class TestSchemaRegistryClient(TestCase):
                     },
                     status_code=422)
                 self.client.schema_is_compatible_with_subject_version('test', 3, SCHEMA)
+
+    def test_set_global_compatibility_level(self):
+        with Mocker() as m:
+            m.put(url('/config'), json={'compatibility': 'FULL'})
+            self.client.set_global_compatibility_level(CompatibilityLevel.full)
+            self.assertEqual({'compatibility': 'FULL'}, m.last_request.json())

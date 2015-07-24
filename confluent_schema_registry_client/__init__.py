@@ -1,8 +1,13 @@
 import requests
 import json
 
-
 HEADERS = {'content-type': 'application/vnd.schemaregistry.v1+json'}
+
+class CompatibilityLevel(object):
+    none = "NONE"
+    full = "FULL"
+    backward = "BACKWARD"
+    forward = "FORWARD"
 
 
 def raise_if_failed(res):
@@ -90,3 +95,10 @@ class SchemaRegistryClient(object):
             data=data, headers=HEADERS)
         raise_if_failed(res)
         return res.json()['is_compatible']
+
+    def set_global_compatibility_level(self, level):
+        res = requests.put(
+            self._url('/config'),
+            data=json.dumps({'compatibility': level}),
+            headers=HEADERS)
+        raise_if_failed(res)
