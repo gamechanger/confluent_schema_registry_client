@@ -5,6 +5,9 @@ from confluent_schema_registry_client import SchemaRegistryClient, SchemaRegistr
 
 TEST_DOMAIN = 'test_domain.gc.com'
 TEST_PORT = 8081
+SCHEMA = {"type": "string"}
+ENCODED_SCHEMA = "{\"type\": \"string\"}"
+
 
 def url(path):
     return 'http://{}:{}{}'.format(
@@ -20,7 +23,7 @@ class TestSchemaRegistryClient(TestCase):
     def test_get_schema(self):
         with Mocker() as m:
             m.get(url('/schemas/ids/abc123'), json={
-                'schema': "{\"type\": \"string\"}"
+                'schema': ENCODED_SCHEMA
             })
 
             schema = self.client.get_schema('abc123')
@@ -63,4 +66,48 @@ class TestSchemaRegistryClient(TestCase):
                     status_code=500)
                 self.client.get_subjects()
 
+    def test_get_subject_version_ids(self):
+        with Mocker() as m:
+            m.get(
+                url('/subjects/test/versions'),
+                json=[1, 2, 3])
+            self.assertEquals(
+                [1, 2, 3],
+                self.client.get_subject_version_ids('test'))
 
+    def test_get_subject_version_ids_non_existent_subject(self):
+        with Mocker() as m:
+            with self.assertRaises(SchemaRegistryException):
+                m.get(
+                    url('/subjects/test/versions'),
+                    json={
+                        "error_code": 40401,
+                        "message": "Subject not found"
+                    },
+                    status_code=404)
+                self.client.get_subject_version_ids('test')
+
+    def test_get_subject_version(self):
+        with Mocker() as m:
+            m.get(
+                url('/subjects/test/versions/34'),
+                json={
+                    'name': 'test',
+                    'version': 34,
+                    'schema': ENCODED_SCHEMA
+                })
+            self.assertEquals(
+                SCHEMA,
+                self.client.get_subject_version('test', 34))
+
+    def test_get_subject_version_non_existent_version(self):
+        with Mocker() as m:
+            with self.assertRaises(SchemaRegistryException):
+                m.get(
+                    url('/subjects/test/versions/34'),
+                    json={
+                        "error_code": 42202,
+                        "message": "Invalid version"
+                    },
+                    status_code=422)
+                self.client.get_subject_version('test', 34)

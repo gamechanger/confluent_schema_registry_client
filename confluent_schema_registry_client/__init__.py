@@ -47,7 +47,7 @@ class SchemaRegistryClient(object):
     def get_subject_version(self, subject, version_id):
         res = requests.get(self._url('/subjects/{}/versions/{}', subject, version_id))
         raise_if_failed(res)
-        return res.json()['schema']
+        return json.loads(res.json()['schema'])
 
     def get_subject_latest_version(self, subject):
         return self.get_subject_version(subject, 'latest')
