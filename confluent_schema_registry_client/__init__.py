@@ -107,3 +107,15 @@ class SchemaRegistryClient(object):
         res = requests.get(self._url('/config'), headers=HEADERS)
         raise_if_failed(res)
         return res.json()['compatibility']
+
+    def set_subject_compatibility_level(self, subject, level):
+        res = requests.put(
+            self._url('/config/{}', subject),
+            data=json.dumps({'compatibility': level}),
+            headers=HEADERS)
+        raise_if_failed(res)
+
+    def get_subject_compatibility_level(self, subject):
+        res = requests.get(self._url('/config/{}', subject), headers=HEADERS)
+        raise_if_failed(res)
+        return res.json()['compatibility']
