@@ -111,6 +111,19 @@ class TestSchemaRegistryClient(TestCase):
                     status_code=422)
                 self.client.get_subject_version('test', 34)
 
+    def test_get_latest_subject_version(self):
+        with Mocker() as m:
+            m.get(
+                url('/subjects/test/versions/latest'),
+                json={
+                    'name': 'test',
+                    'version': 34,
+                    'schema': STRING_SCHEMA
+                })
+            self.assertEquals(
+                SCHEMA,
+                self.client.get_subject_latest_version('test'))
+
     def test_register_subject_version(self):
         with Mocker() as m:
             m.post(

@@ -58,12 +58,13 @@ class SchemaRegistryClient(object):
         raise_if_failed(res)
         return json.loads(res.json()['schema'])
 
+    def get_subject_latest_version(self, subject):
+        return self.get_subject_version(subject, 'latest')
+
     def register_subject_version(self, subject, schema):
         data = json.dumps({'schema': json.dumps(schema)})
         res = requests.post(self._url('/subjects/{}/versions', subject), data=data, headers=HEADERS)
         raise_if_failed(res)
         return res.json()
 
-    def get_subject_latest_version(self, subject):
-        return self.get_subject_version(subject, 'latest')
 
