@@ -3,6 +3,14 @@ from requests_mock import Mocker
 from confluent_schema_registry_client import SchemaRegistryClient, SchemaRegistryException
 
 
+TEST_DOMAIN = 'test_domain.gc.com'
+TEST_PORT = 8081
+
+def url(path):
+    return 'http://{}:{}{}'.format(
+        TEST_DOMAIN, TEST_PORT, path)
+
+
 class TestSchemaRegistryClient(TestCase):
 
     def setUp(self):
@@ -11,7 +19,7 @@ class TestSchemaRegistryClient(TestCase):
 
     def test_get_schema(self):
         with Mocker() as m:
-            m.get('http://test_domain.gc.com:8081/schemas/ids/abc123', json={
+            m.get(url('/schemas/ids/abc123'), json={
                 'schema': "{\"type\": \"string\"}"
             })
 
@@ -22,7 +30,7 @@ class TestSchemaRegistryClient(TestCase):
         with Mocker() as m:
             with self.assertRaises(SchemaRegistryException) as cm:
                 m.get(
-                    'http://test_domain.gc.com:8081/schemas/ids/abc123',
+                    url('/schemas/ids/abc123'),
                     json={
                         "error_code": 40403,
                         "message": "Schema not found"
@@ -37,7 +45,7 @@ class TestSchemaRegistryClient(TestCase):
     def test_get_subjects(self):
         with Mocker() as m:
             m.get(
-                'http://test_domain.gc.com:8081/subjects',
+                url('/subjects'),
                 json=["beans", "frank"])
             self.assertEquals(
                 ["beans", "frank"],
@@ -47,10 +55,12 @@ class TestSchemaRegistryClient(TestCase):
         with Mocker() as m:
             with self.assertRaises(SchemaRegistryException):
                 m.get(
-                    'http://test_domain.gc.com:8081/subjects',
+                    url('/subjects'),
                     json={
                         "error_code": 50001,
                         "message": "Error in the backend datastore"
                     },
                     status_code=500)
                 self.client.get_subjects()
+
+
