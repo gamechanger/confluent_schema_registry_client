@@ -142,3 +142,29 @@ class TestSchemaRegistryClient(TestCase):
                 m.post(
                     url('/subjects/test/versions'), status_code=409)
                 self.client.register_subject_version('test', SCHEMA)
+
+    def test_schema_registration_for_subject(self):
+        with Mocker() as m:
+            m.post(
+                url('/subjects/test'),
+                json={
+                    'subject': 'test',
+                    'id': 34,
+                    'version': 3,
+                    'schema': STRING_SCHEMA
+                })
+            schema_id, version = self.client.schema_registration_for_subject('test', SCHEMA)
+            self.assertEquals(34, schema_id)
+            self.assertEquals(3, version)
+            self.assertEquals({'schema': STRING_SCHEMA}, m.last_request.json())
+
+    def test_schema_registration_for_subject_unknown_schema(self):
+        with Mocker() as m:
+            with self.assertRaises(SchemaRegistryException):
+                m.post(
+                    url('/subjects/test'),
+                    json={
+                        'error_code': 40403,
+                        'message': 'Schema not found'
+                    }, status_code=404)
+                self.client.schema_registration_for_subject('test', SCHEMA)
