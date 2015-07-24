@@ -168,3 +168,26 @@ class TestSchemaRegistryClient(TestCase):
                         'message': 'Schema not found'
                     }, status_code=404)
                 self.client.schema_registration_for_subject('test', SCHEMA)
+
+    def test_schema_is_registered_for_subject(self):
+        with Mocker() as m:
+            m.post(
+                url('/subjects/test'),
+                json={
+                    'subject': 'test',
+                    'id': 34,
+                    'version': 3,
+                    'schema': STRING_SCHEMA
+                })
+            self.assertTrue(self.client.schema_is_registered_for_subject('test', SCHEMA))
+            self.assertEquals({'schema': STRING_SCHEMA}, m.last_request.json())
+
+    def test_schema_is_registered_for_subject_unknown_schema(self):
+        with Mocker() as m:
+            m.post(
+                url('/subjects/test'),
+                json={
+                    'error_code': 40403,
+                    'message': 'Schema not found'
+                }, status_code=404)
+            self.assertFalse(self.client.schema_is_registered_for_subject('test', SCHEMA))

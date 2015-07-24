@@ -73,3 +73,11 @@ class SchemaRegistryClient(object):
         raise_if_failed(res)
         res_data = res.json()
         return res_data['id'], res_data['version']
+
+    def schema_is_registered_for_subject(self, subject, schema):
+        data = json.dumps({'schema': json.dumps(schema)})
+        res = requests.post(self._url('/subjects/{}', subject), data=data, headers=HEADERS)
+        if res.status_code == 404:
+            return False
+        raise_if_failed(res)
+        return True
