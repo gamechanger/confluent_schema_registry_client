@@ -4,16 +4,6 @@ import json
 
 HEADERS = {'content-type': 'application/vnd.schemaregistry.v1+json'}
 
-class SchemaRegistryException(Exception):
-    """
-    Base exception class for all SchemaRegistryClient-raised exceptions.
-    """
-    def __init__(self, code=None, message=None):
-        self.code = code
-        self.message = message
-
-    def __str__(self):
-        return "{}({})".format(self.__class__.__name__, self.__dict__)
 
 def raise_if_failed(res):
     if res.status_code >= 400:
@@ -25,6 +15,17 @@ def raise_if_failed(res):
             e = SchemaRegistryException()
         raise e
 
+
+class SchemaRegistryException(Exception):
+    """
+    Base exception class for all SchemaRegistryClient-raised exceptions.
+    """
+    def __init__(self, code=None, message=None):
+        self.code = code
+        self.message = message
+
+    def __str__(self):
+        return "{}({})".format(self.__class__.__name__, self.__dict__)
 
 
 class SchemaRegistryClient(object):
@@ -81,3 +82,11 @@ class SchemaRegistryClient(object):
             return False
         raise_if_failed(res)
         return True
+
+    def schema_is_compatible_with_subject_version(self, subject, version_id, schema):
+        data = json.dumps({'schema': json.dumps(schema)})
+        res = requests.post(
+            self._url('/compatibility/subjects/{}/versions/{}', subject, version_id),
+            data=data, headers=HEADERS)
+        raise_if_failed(res)
+        return res.json()['is_compatible']

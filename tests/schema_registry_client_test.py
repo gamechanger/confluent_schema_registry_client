@@ -191,3 +191,31 @@ class TestSchemaRegistryClient(TestCase):
                     'message': 'Schema not found'
                 }, status_code=404)
             self.assertFalse(self.client.schema_is_registered_for_subject('test', SCHEMA))
+
+    def test_schema_is_compatible_with_subject_version(self):
+        with Mocker() as m:
+            m.post(
+                url('/compatibility/subjects/test/versions/3'),
+                json={'is_compatible': True})
+            self.assertTrue(self.client.schema_is_compatible_with_subject_version('test', 3, SCHEMA))
+            self.assertEquals({'schema': STRING_SCHEMA}, m.last_request.json())
+
+    def test_schema_is_not_compatible_with_subject_version(self):
+        with Mocker() as m:
+            m.post(
+                url('/compatibility/subjects/test/versions/3'),
+                json={'is_compatible': False})
+            self.assertFalse(self.client.schema_is_compatible_with_subject_version('test', 3, SCHEMA))
+            self.assertEquals({'schema': STRING_SCHEMA}, m.last_request.json())
+
+    def test_schema_is_compatible_with_subject_version_bad_subject(self):
+        with Mocker() as m:
+            with self.assertRaises(SchemaRegistryException):
+                m.post(
+                    url('/compatibility/subjects/test/versions/3'),
+                    json={
+                        "error_code": 42202,
+                        "message": "Invalid version"
+                    },
+                    status_code=422)
+                self.client.schema_is_compatible_with_subject_version('test', 3, SCHEMA)
