@@ -226,3 +226,9 @@ class TestSchemaRegistryClient(TestCase):
             m.put(url('/config'), json={'compatibility': 'FULL'})
             self.client.set_global_compatibility_level(CompatibilityLevel.full)
             self.assertEqual({'compatibility': 'FULL'}, m.last_request.json())
+
+    def test_get_global_compatibility_level(self):
+        with Mocker() as m:
+            m.get(url('/config'), json={'compatibility': 'FULL'})
+            level = self.client.get_global_compatibility_level()
+            self.assertEquals(CompatibilityLevel.full, level)

@@ -102,3 +102,8 @@ class SchemaRegistryClient(object):
             data=json.dumps({'compatibility': level}),
             headers=HEADERS)
         raise_if_failed(res)
+
+    def get_global_compatibility_level(self):
+        res = requests.get(self._url('/config'), headers=HEADERS)
+        raise_if_failed(res)
+        return res.json()['compatibility']
