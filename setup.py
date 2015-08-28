@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="confluent_schema_registry_client",
-    version="1.0.1",
+    version="1.1.0",
     author="Tom Leach",
     author_email="tom@gc.com",
     description="A simple client Confluent's Avro Schema Registry",
