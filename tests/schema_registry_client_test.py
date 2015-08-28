@@ -129,7 +129,7 @@ class TestSchemaRegistryClient(TestCase):
         with Mocker() as m:
             m.post(
                 url('/subjects/test/versions'),
-                json=34)
+                json={'id':34})
             self.assertEquals(
                 34,
                 self.client.register_subject_version('test', SCHEMA))

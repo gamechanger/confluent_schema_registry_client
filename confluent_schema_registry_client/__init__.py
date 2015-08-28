@@ -98,7 +98,7 @@ class SchemaRegistryClient(object):
         data = json.dumps({'schema': json.dumps(schema)})
         res = requests.post(self._url('/subjects/{}/versions', subject), data=data, headers=HEADERS)
         raise_if_failed(res)
-        return res.json()
+        return res.json()['id']
 
     def schema_registration_for_subject(self, subject, schema):
         """
